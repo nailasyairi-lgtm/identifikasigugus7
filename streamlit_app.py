@@ -60,7 +60,7 @@ else:
     st.write(" Silakan pilih **satu reagen** yang menurut Anda paling aman dan tepat untuk menguji sampel:")
 
     # Tombol Pilihan Action/Reagen
-    pilihan_aksi = st.radio(
+         pilihan_aksi = st.radio(
         "Pilih tindakan Anda:",
         [
             "👉 Uji dengan Kertas Lakmus Biru (Cek Sifat Asam)",
