@@ -1,83 +1,131 @@
 import streamlit as st
 
 # Konfigurasi Halaman Web
-st.set_page_config(page_title="Interactive Reagent Rack", page_icon="🧪", layout="centered")
+st.set_page_config(page_title="Chemical RPG Game", page_icon="🎮", layout="centered")
 
-# --- JUDUL ELEGAN ---
-st.markdown("<h2 style='text-align: center; color: #0284C7; font-family: sans-serif;'>🧪 RAK REAGEN VIRTUAL</h2>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #64748B;'>Nyalakan sakelar reagen di bawah untuk menguji sampel misterius Anda!</p>", unsafe_allow_html=True)
+# --- INISIALISASI DATA GAME (Penyimpanan Sementara) ---
+# Menggunakan session_state agar nilai tidak ter-reset saat tombol diklik
+if 'nyawa' not in st.session_state:
+    st.session_state.nyawa = 3
+if 'skor' not in st.session_state:
+    st.session_state.skor = 0
+if 'status_game' not in st.session_state:
+    st.session_state.status_game = "BERMAIN" # Pilihan: BERMAIN, MENANG, GAME_OVER
+
+# --- FUNGSI UNTUK RESET GAME ---
+def reset_game():
+    st.session_state.nyawa = 3
+    st.session_state.skor = 0
+    st.session_state.status_game = "BERMAIN"
+
+# --- TAMPILAN HEADER GAME ---
+st.markdown("<h1 style='text-align: center; color: #4F46E5;'>🎮 LAB ADVENTURE: Misteri Gugus Fungsi</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #475569;'>Misi: Tebak isi botol misterius di laboratorium sebelum energi Anda habis!</p>", unsafe_allow_html=True)
 st.markdown("---")
 
-# --- AREA MEJA KERJA LAB (INPUT SAKELAR) ---
-st.markdown("### 🎛️ Panel Sakelar Reagen (On / Off)")
-
-# Membuat 3 kolom rapi untuk sakelar reagen
-col_reg1, col_reg2, col_reg3 = st.columns(3)
-
-with col_reg1:
-    st.markdown("**Uji Lakmus**")
-    sakelar_lakmus = st.toggle("Celup Lakmus Biru", value=False)
-
-with col_reg2:
-    st.markdown("**Uji Schiff**")
-    sakelar_schiff = st.toggle("Tetes Reagen Schiff", value=False)
-
-with col_reg3:
-    st.markdown("**Uji Bisulfit**")
-    sakelar_bisulit = st.toggle("Tambah NaHSO3", value=False)
+# --- PANEL STATUS PLAYER (Scoreboard Berwarna) ---
+col_stat1, col_stat2 = st.columns(2)
+with col_stat1:
+    st.markdown(f"### ❤️ Energi: {'⭐' * st.session_state.nyawa if st.session_state.nyawa > 0 else '❌ Lelah'}")
+with col_stat2:
+    st.markdown(f"### 🏆 Skor: `{st.session_state.skor} Poin`")
 
 st.markdown("---")
 
-# --- MEJA PENGAMATAN (OUTPUT) ---
-st.markdown("### 🔍 Kondisi Fisik Tabung Reaksi")
+# ==========================================
+# JALUR CERITA & LOGIKA GAME
+# ==========================================
 
-# Logika penentuan warna tabung dan tebakan gugus fungsi
-if sakelar_lakmus:
-    # Jika lakmus dinyalakan (Asam Karboksilat)
-    st.markdown("""
-        <div style='background-color: #FEE2E2; border-left: 8px solid #EF4444; padding: 20px; border-radius: 8px;'>
-            <h3 style='color: #991B1B; margin: 0;'>🔴 Tabung Bereaksi: WARNA MERAH</h3>
-            <p style='color: #7F1D1D; margin-top: 10px; font-size: 16px;'>
-                <b>Analisis Detektor:</b> Kertas lakmus biru langsung berubah menjadi merah! <br>
-                🎯 Fix, sampel ini adalah golongan <b>ASAM KARBOKSILAT (—COOH)</b> karena memiliki ion H+ bebas.
-            </p>
-        </div>
-    """, unsafe_allow_html=True)
+# STATUS 1: JIKA GAME OVER
+if st.session_state.status_game == "GAME_OVER":
+    st.error("💥 **GAME OVER!** Anda salah mencampurkan bahan kimia berbahaya dan laboratorium meledak!")
+    st.write("Jangan menyerah, seorang analis hebat belajar dari kegagalan.")
+    if st.button("🔄 Ulangi Misi (Reset Game)", type="primary"):
+        reset_game()
+        st.rerun()
 
-elif sakelar_schiff:
-    # Jika schiff dinyalakan (Aldehid)
-    st.markdown("""
-        <div style='background-color: #FAE8FF; border-left: 8px solid #D946EF; padding: 20px; border-radius: 8px;'>
-            <h3 style='color: #86198F; margin: 0;'>🟣 Tabung Bereaksi: WARNA UNGU KEMERAHAN</h3>
-            <p style='color: #701A75; margin-top: 10px; font-size: 16px;'>
-                <b>Analisis Detektor:</b> Reagen Schiff kembali ke warna asalnya akibat gugus karbonil bebas.<br>
-                🎯 Fix, sampel ini adalah golongan <b>ALDEHID / ALKANAL (—CHO)</b>.
-            </p>
-        </div>
-    """, unsafe_allow_html=True)
+# STATUS 2: JIKA MENANG
+elif st.session_state.status_game == "MENANG":
+    st.balloons() # Efek selebrasi balon di layar
+    st.success(f"🎉 **SELAMAT!** Anda berhasil menyelesaikan teka-teki laboratorium dengan skor akhir {st.session_state.skor}!")
+    st.write("👨‍🔬 Dosen pembimbing bangga pada Anda. Anda berhak mendapatkan gelar *Master of Organic Chemistry*!")
+    if st.button("🎮 Main Lagi", type="primary"):
+        reset_game()
+        st.rerun()
 
-elif sakelar_bisulit:
-    # Jika bisulfit dinyalakan (Keton)
-    st.markdown("""
-        <div style='background-color: #F8FAFC; border-left: 8px solid #64748B; padding: 20px; border-radius: 8px; border: 1px solid #CBD5E1;'>
-            <h3 style='color: #334155; margin: 0;'>⚪ Tabung Bereaksi: TERBENTUK KRISTAL PUTIH</h3>
-            <p style='color: #1E293B; margin-top: 10px; font-size: 16px;'>
-                <b>Analisis Detektor:</b> Terjadi reaksi adisi nukleofilik yang menghasilkan garam sukar larut.<br>
-                🎯 Fix, sampel ini adalah golongan <b>KETON / ALKANON (—CO—)</b>.
-            </p>
-        </div>
-    """, unsafe_allow_html=True)
-
+# STATUS 3: SEDANG BERMAIN
 else:
-    # Jika semua sakelar mati (Kondisi Awal)
-    st.markdown("""
-        <div style='background-color: #F0F9FF; border-left: 8px solid #0EA5E9; padding: 20px; border-radius: 8px;'>
-            <h3 style='color: #075985; margin: 0;'>💧 Tabung Saat Ini: BENING & JERNIH</h3>
-            <p style='color: #0C4A6E; margin-top: 10px;'>
-                Belum ada reagen yang dimasukkan ke dalam sampel. Silakan klik/nyalakan salah satu <b>sakelar toggle</b> di atas untuk memulai reaksi kimia virtual!
-            </p>
-        </div>
-    """, unsafe_allow_html=True)
+    st.markdown("### 🥼 Situasi Ruangan:")
+    st.info("Anda menemukan botol kaca buram berisi cairan bening berbau tajam. Di meja tersedia 3 reagen uji.")
+    st.write(" Silakan pilih **satu reagen** yang menurut Anda paling aman dan tepat untuk menguji sampel:")
 
-st.write("")
-st.caption("✨ Kelebihan versi ini: Menggunakan komponen UI murni, sangat ringan, dan bebas dari error crash.")
+    # Tombol Pilihan Action/Reagen
+    pilihan_aksi = st.radio(
+        "Pilih tindakan Anda:",
+        [
+            "👉 Uji dengan Kertas Lakmus Biru (Cek Sifat Asam)",
+            "👉 Teteskan Reagen Schiff (Cek Gugus Aldehid)",
+            "👉 Tambahkan Larutan Perak Nitrat / Tollens (Uji Cermin Perak)"
+        ],
+        index=None, # Membikin pilihan kosong di awal
+        placeholder="Pilih opsi untuk melangkah..."
+    )
+
+    st.markdown("---")
+
+    # Tombol untuk Submit Jawaban / Melangkah
+    if pilihan_aksi:
+        st.markdown("### 🎬 Hasil Tindakan Anda:")
+        
+        # SAKLAR LOGIKA JAWABAN GAME
+        
+        # Opsi 1: Jawaban Salah/Zonk (Uji Lakmus)
+        if "Kertas Lakmus Biru" in pilihan_aksi:
+            st.markdown("""
+                <div style='background-color: #FEF2F2; border-left: 5px solid #EF4444; padding: 15px; border-radius: 5px;'>
+                    <p style='color: #991B1B; margin: 0;'>
+                        <b>Hasil:</b> Kertas lakmus tetap berwarna biru (Senyawa Netral). <br>
+                        ⚠️ Anda tidak mendapatkan petunjuk apa pun dan membuang-buang waktu laboratorium!
+                    </p>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            # Mengurangi Nyawa
+            if st.button("Lanjutkan Langkah ➡️"):
+                st.session_state.nyawa -= 1
+                if st.session_state.nyawa <= 0:
+                    st.session_state.status_game = "GAME_OVER"
+                st.rerun()
+
+        # Opsi 2: Jawaban Setengah Benar (Uji Schiff)
+        elif "Reagen Schiff" in pilihan_aksi:
+            st.markdown("""
+                <div style='background-color: #FFFBEB; border-left: 5px solid #F59E0B; padding: 15px; border-radius: 5px;'>
+                    <p style='color: #92400E; margin: 0;'>
+                        <b>Hasil:</b> Larutan tetap bening, tidak berubah menjadi ungu kemerahan. <br>
+                        💡 <b>Petunjuk Didapat:</b> Fix! Sampel ini 100% <u>BUKAN Aldehid</u>. Berarti kemungkinan besar adalah Keton!
+                    </p>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            # Menambah Skor Kecil
+            if st.button("Lanjutkan Langkah ➡️"):
+                st.session_state.skor += 50
+                st.rerun()
+
+        # Opsi 3: Jawaban Benar / Kunci Kemenangan (Uji Tollens)
+        elif "Perak Nitrat" in pilihan_aksi:
+            st.markdown("""
+                <div style='background-color: #ECFDF5; border-left: 5px solid #10B981; padding: 15px; border-radius: 5px;'>
+                    <p style='color: #065F46; margin: 0;'>
+                        <b>Hasil:</b> Dinding tabung reaksi tiba-tiba dilapisi lapisan perak mengkilap seperti cermin! <br>
+                        🎯 <b>ANALISIS SEMPURNA:</b> Reaksi cermin perak positif membuktikan sampel adalah <b>ALDEHID</b>! Misi berhasil diselesaikan!
+                    </p>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            # Menang Game
+            if st.button("Klaim Kemenangan 🏆"):
+                st.session_state.skor += 200
+                st.session_state.status_game = "MENANG"
+                st.rerun()
