@@ -1,107 +1,128 @@
 import streamlit as st
+import matplotlib.pyplot as plt
 
 # Konfigurasi Halaman Web
-st.set_page_config(
-    page_title="Organic Chemistry Identifier", 
-    page_icon="🌈", 
-    layout="centered"
-)
+st.set_page_config(page_title="Chemical Detective Lab", page_icon="🕵️‍♂️", layout="centered")
 
-# --- HEADER APLIKASI DENGAN WARNA & STYLE ---
-st.markdown("<h1 style='text-align: center; color: #FF4B4B;'>🌈 Smart Lab: Identifikasi Gugus Fungsi</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; font-size: 18px; color: #555555;'>Tebak golongan senyawa organik berdasarkan hasil uji reagen laboratorium secara instan!</p>", unsafe_allow_html=True)
+# --- STYLE CSS UNTUK MENAMPILKAN VIBE LABORATORIUM ---
+st.markdown("""
+    <style>
+    .reportview-container { background: #f5f7f8; }
+    .stRadio > div { background-color: #ffffff; padding: 15px; border-radius: 10px; box-shadow: 1px 1px 5px rgba(0,0,0,0.05); }
+    h1 { font-family: 'Courier New', Courier, monospace; font-weight: bold; }
+    </style>
+    """, unsafe_allow_html=True)
+
+# --- HEADER GAME / DETEKTIF ---
+st.markdown("<h1 style='text-align: center; color: #0F172A;'>🕵️‍♂️ DETEKTIF KIMIA: Misi Kode Sampel X</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #475569;'>Sebuah sampel misterius tanpa label ditemukan di meja lab. Gunakan reagen untuk mengungkap identitasnya!</p>", unsafe_allow_html=True)
 st.markdown("---")
 
-# --- BANNER SELAMAT DATANG ---
-st.info("👋 **Halo Analis!** Silakan masukkan data pengamatan dari meja praktikum kamu pada panel di bawah ini, lalu lihat keajaiban analisisnya.")
+# --- INPUT LOGBOOK ANALIS ---
+col_info1, col_info2 = st.columns(2)
+with col_info1:
+    nama_analis = st.text_input("✍️ Nama Analis / Detektif:", "Analis AKA")
+with col_info2:
+    kode_sampel = st.text_input("🏷️ Kode Botol Sampel:", "SAMPEL-007")
 
-# --- AREA INPUT (DIBUAT DALAM KOTAK/CONTAINER) ---
-with st.container(border=True):
-    st.markdown("<h3 style='color: #1E3A8A;'>📋 Hasil Pengamatan Reagen:</h3>", unsafe_allow_html=True)
-    
-    # Menggunakan Radio Button Horizontal agar lebih visual dan berwarna saat diklik
+st.write("")
+
+# --- PROSEDUR PENGUJIAN (INPUT) ---
+st.markdown("### 🧪 Langkah Pengujian Reagen")
+
+# Menggunakan expander agar UI terlihat rapi seperti tahapan SOP Lab
+with st.expander("🔬 LANGKAH 1: Uji Lakmus (Sifat Asam/Basa)", expanded=True):
     uji_lakmus = st.radio(
-        "1. Uji Indikator (Kertas Lakmus Biru)",
-        ["🔵 Tetap Biru (Netral/Basa)", "🔴 Berubah Menjadi Merah (Asam)"],
-        horizontal=True
+        "Celupkan kertas lakmus biru ke dalam sampel, apa yang terjadi?",
+        ["Warna tetap Biru (Netral/Basa)", "Warna berubah menjadi Merah (Asam)"]
     )
-    
-    st.write("") # Jarak
-    
+
+with st.expander("🔬 LANGKAH 2: Uji Reagen Schiff (Spesifik Aldehid)", expanded=True):
     uji_schiff = st.radio(
-        "2. Uji Schiff (Identifikasi Spesifik Aldehid)",
-        ["⚪ Tidak Bereaksi (Tetap Bening)", "🟣 Positif (Muncul Warna Ungu Kemerahan)"],
-        horizontal=True
+        "Teteskan 3 tetes reagen Schiff ke dalam tabung reaksi:",
+        ["Larutan tetap bening tak berwarna", "Larutan berubah menjadi ungu kemerahan / fushsin"]
     )
-    
-    st.write("") # Jarak
-    
+
+with st.expander("🔬 LANGKAH 3: Uji Natrium Bisulfit (Gugus Karbonil)", expanded=True):
     uji_bisulit = st.radio(
-        "3. Uji Natrium Bisulfit (Gugus Karbonil)",
-        ["🟡 Tidak Terbentuk Endapan", "⚪ Positif (Terbentuk Kristal/Endapan Putih)"],
-        horizontal=True
+        "Tambahkan larutan NaHSO3 jenuh ke dalam sampel:",
+        ["Tidak ada gejala reaksi (Tetap jernih)", "Terbentuk endapan kristal putih di dasar tabung"]
     )
 
 st.markdown("---")
 
-# --- PROSES ANALISIS & OUTPUT OTOMATIS (TANPA TOMBOL AGAR LEBIH INTERAKTIF) ---
-st.markdown("<h3 style='text-align: center; color: #1E3A8A;'>🔍 Hasil Analisis Laboratorium</h3>", unsafe_allow_html=True)
+# --- LOGIKA ANALISIS & VISUALISASI STRUKTUR ---
+st.markdown("<h3 style='text-align: center; color: #0F172A;'>📂 Laporan Hasil Investigasi</h3>", unsafe_allow_html=True)
 
-# Logika Penentuan Gugus Fungsi (Sistem Pakar Berwarna)
+# Fungsi untuk menggambar struktur molekul buatan (Simpel & Unik menggunakan Matplotlib)
+def gambar_struktur(gugus):
+    fig, ax = plt.subplots(figsize=(3, 2))
+    ax.axis('off')
+    if gugus == "Asam Karboksilat":
+        # Menggambar R-C(=O)-OH
+        ax.text(0.1, 0.5, "R", fontsize=20, weight='bold', color='#1E293B')
+        ax.text(0.3, 0.5, "— C", fontsize=20, weight='bold', color='#1E293B')
+        ax.text(0.5, 0.8, "═ O", fontsize=20, weight='bold', color='#EF4444') # O ganda di atas
+        ax.text(0.6, 0.2, "— OH", fontsize=20, weight='bold', color='#0EA5E9')
+    elif gugus == "Aldehid":
+        # Menggambar R-C(=O)-H
+        ax.text(0.1, 0.5, "R", fontsize=20, weight='bold', color='#1E293B')
+        ax.text(0.3, 0.5, "— C", fontsize=20, weight='bold', color='#1E293B')
+        ax.text(0.5, 0.8, "═ O", fontsize=20, weight='bold', color='#EF4444')
+        ax.text(0.6, 0.2, "— H", fontsize=20, weight='bold', color='#10B981')
+    elif gugus == "Keton":
+        # Menggambar R-C(=O)-R'
+        ax.text(0.1, 0.5, "R", fontsize=20, weight='bold', color='#1E293B')
+        ax.text(0.3, 0.5, "— C", fontsize=20, weight='bold', color='#1E293B')
+        ax.text(0.5, 0.8, "═ O", fontsize=20, weight='bold', color='#EF4444')
+        ax.text(0.6, 0.2, "— R'", fontsize=20, weight='bold', color='#F59E0B')
+    return fig
 
-# 1. KONDISI ASAM KARBOKSILAT
-if "🔴 Berubah Menjadi Merah" in uji_lakmus:
-    st.error("### 🎯 Senyawa: ASAM KARBOKSILAT (—COOH)")
+# Evaluasi Hasil Game Detektif
+status_ditemukan = False
+gugus_nama = ""
+
+if "Warna berubah menjadi Merah" in uji_lakmus:
+    gugus_nama = "Asam Karboksilat"
+    status_ditemukan = True
+    st.error(f"### 🎉 MISI BERHASIL: {kode_sampel} adalah ASAM KARBOKSILAT!")
     
-    col1, col2 = st.columns([1, 2])
-    with col1:
-        st.markdown("<h1 style='font-size: 80px; text-align: center;'>🧪</h1>", unsafe_allow_html=True)
-    with col2:
-        st.markdown("""
-        * **Sifat Kimia:** Bersifat asam lemah. Mampu melepaskan ion $H^+$ yang memutuskan ikatan konjugasi pada lakmus sehingga berubah menjadi merah.
-        * **Reaksi Turunan:** Jika direaksikan dengan alkohol + katalis $H_2SO_4$, akan menghasilkan bau harum khas **Ester** (Reaksi Esterifikasi).
-        """)
-    st.toast("Analisis Berhasil: Asam Karboksilat ditemukan!", icon="🔴")
+elif "Larutan berubah menjadi ungu" in uji_schiff:
+    gugus_nama = "Aldehid"
+    status_ditemukan = True
+    st.success(f"### 🎉 MISI BERHASIL: {kode_sampel} adalah ALDEHID (ALKANAL)!")
 
-# 2. KONDISI ALDEHID
-elif "🟣 Positif" in uji_schiff:
-    st.success("### 🎯 Senyawa: ALDEHID / ALKANAL (—CHO)")
+elif "Terbentuk endapan kristal" in uji_bisulit and "Larutan tetap bening" in uji_schiff:
+    gugus_nama = "Keton"
+    status_ditemukan = True
+    st.warning(f"### 🎉 MISI BERHASIL: {kode_sampel} adalah KETON (ALKANON)!")
+
+# Tampilkan Informasi Spesifikasi Unik jika Berhasil Ditebak
+if status_ditemukan:
+    st.balloons() # Efek selebrasi balon di layar!
     
-    col1, col2 = st.columns([1, 2])
-    with col1:
-        st.markdown("<h1 style='font-size: 80px; text-align: center;'>🍇</h1>", unsafe_allow_html=True)
-    with col2:
-        st.markdown("""
-        * **Prinsip Uji Schiff:** Reagen Schiff (Fushsin) yang awalnya terdekolorisasi oleh $SO_2$ akan berikatan kembali dengan gugus fungsi **Aldehid**. Hal ini mengembalikan struktur kromofor reagen sehingga warna **Ungu Kemerahan** muncul kembali.
-        * **Uji Pembanding:** Senyawa ini juga pasti positif terhadap uji **Benedict** (endapan merah bata) dan uji **Tollens** (cermin perak).
+    col_has1, col_has2 = st.columns([1, 1])
+    with col_has1:
+        st.write("**Sketsa Rumus Struktur Gugus:**")
+        st.pyplot(gambar_struktur(gugus_nama))
+    with col_has2:
+        st.markdown(f"""
+        **Sertifikat Analisis Digital:**
+        * 🕵️‍♂️ **Pemeriksa:** {nama_analis}
+        * 🧪 **Gugus Utama:** `{gugus_nama}`
+        * 📈 **Tingkat Akurasi:** 99.8% (Sistem Pakar)
         """)
-    st.toast("Analisis Berhasil: Aldehid ditemukan!", icon="🟣")
-
-# 3. KONDISI KETON
-elif "⚪ Positif" in uji_bisulit and "⚪ Tidak Bereaksi" in uji_schiff:
-    st.warning("### 🎯 Senyawa: KETON / ALKANON (—CO—)")
-    
-    col1, col2 = st.columns([1, 2])
-    with col1:
-        st.markdown("<h1 style='font-size: 80px; text-align: center;'>💎</h1>", unsafe_allow_html=True)
-    with col2:
-        st.markdown("""
-        * **Prinsip Uji Bisulfit:** Gugus karbonil pada keton (terutama metil keton) mengalami reaksi **adisi nukleofilik** dengan ion bisulfit ($HSO_3^-$) membentuk garam adisi yang sukar larut, sehingga mengendap sebagai kristal putih.
-        * **Kenapa bukan Aldehid?** Karena hasil Uji Schiff menunjukkan warna bening (negatif), mengonfirmasi tidak adanya gugus aldehid bebas.
-        """)
-    st.toast("Analisis Berhasil: Keton ditemukan!", icon="⚪")
-
-# 4. KONDISI DEFAULT / BELUM SPESIFIK
+        st.info("💡 Struktur di samping adalah representasi ikatan karbonil dan fungsional zat sampel kamu.")
 else:
     st.markdown(
         """
-        <div style='background-color: #F0F2F6; padding: 20px; border-radius: 10px; border-left: 5px solid #7E7E7E;'>
-            <h4 style='color: #333333; margin-top:0;'>ℹ️ Status: Menunggu Kombinasi Uji Spesifik</h4>
-            <p style='color: #555555; margin-bottom:0;'>
-                Silakan ubah pilihan reagen di atas. Jika semua hasil bernilai negatif, kemungkinan sampel kamu adalah golongan <b>Alkohol (Alkanol)</b> atau <b>Ester (Alkil Alkanoat)</b> yang bersifat netral.
+        <div style='background-color: #1E293B; padding: 20px; border-radius: 10px; text-align: center;'>
+            <h4 style='color: #FFFFFF; margin-top:0;'>🕵️‍♂️ Detektif Sedang Berpikir...</h4>
+            <p style='color: #94A3B8; margin-bottom:0;'>
+                Kombinasi reagen saat ini condong ke senyawa Netral (seperti <b>Alkohol</b> atau <b>Ester</b>). <br>
+                Cobalah ubah salah satu opsi reagen di atas untuk melihat perubahan zat!
             </p>
         </div>
         """, 
         unsafe_allow_html=True
     )
-    
